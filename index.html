@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>奖券扫码器</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -13,6 +13,9 @@
       background: linear-gradient(180deg, #fff1f4, #ffffff);
       text-align: center;
       padding: 20px;
+      min-height: 100vh;
+      /* Prevents pull-to-refresh on mobile Chrome/Safari */
+      overscroll-behavior: none;
     }
 
     h1 {
@@ -40,14 +43,13 @@
     #reader {
       border-radius: 16px;
       overflow: hidden;
+      background: #f8f8f8;
     }
 
-    /* Loading 动画 */
     .loading {
       margin-top: 12px;
       font-size: 18px;
       color: #ff7a9e;
-      display: none;
       animation: pulse 1.5s infinite;
     }
 
@@ -57,25 +59,24 @@
       100% { transform: scale(1); opacity: 0.6; }
     }
 
-    /* 遮罩 */
     .overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,.45);
+      backdrop-filter: blur(3px); /* Modern frosted glass effect */
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 99;
     }
 
-    /* 弹窗 */
     .modal {
       background: #fff;
       border-radius: 20px;
       padding: 22px;
       width: 80%;
       max-width: 300px;
-      animation: pop .3s ease;
+      animation: pop .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .modal h2 {
@@ -94,9 +95,15 @@
       background: #ff7a9e;
       color: #fff;
       border: none;
-      padding: 10px 18px;
+      padding: 12px 24px;
       border-radius: 20px;
       font-size: 15px;
+      font-weight: bold;
+      -webkit-tap-highlight-color: transparent; /* Removes blue box on tap */
+    }
+
+    .btn:active {
+      transform: scale(0.95);
     }
 
     @keyframes pop {
@@ -115,7 +122,6 @@
   <div id="loading" class="loading">🐷 思考中...</div>
 </div>
 
-<!-- 弹窗 -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <h2>🎉 扫描成功</h2>
@@ -135,14 +141,17 @@ const prizes = {
 };
 
 let locked = false;
-const loading = document.getElementById("loading");
+const loadingText = document.getElementById("loading");
+const html5QrCode = new Html5Qrcode("reader");
 
 function onScanSuccess(text) {
   if (locked) return;
   locked = true;
-  loading.style.display = "none"; // 隐藏 loading
-  document.getElementById("modalText").innerText =
-    prizes[text] || "❌ 无效奖券";
+  
+  // Haptic feedback for mobile
+  if (navigator.vibrate) navigator.vibrate(50);
+
+  document.getElementById("modalText").innerText = prizes[text] || "❌ 无效奖券";
   document.getElementById("overlay").style.display = "flex";
 }
 
@@ -151,17 +160,21 @@ function closeModal() {
   locked = false;
 }
 
-new Html5Qrcode("reader").start(
+// Mobile-optimized initialization
+html5QrCode.start(
   { facingMode: "environment" },
-  { fps: 10, qrbox: 250 },
-  (text) => {
-    loading.style.display = "none";
-    onScanSuccess(text);
+  { 
+    fps: 10, 
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0 
   },
-  (errorMessage) => {
-    loading.style.display = "block";
-  }
-);
+  onScanSuccess
+).then(() => {
+    // Keep your original "Thinking" emoji/text or change to "Ready"
+    loadingText.innerHTML = "🐷 准备好啦！"; 
+}).catch(err => {
+    loadingText.innerText = "❌ 请允许相机权限";
+});
 </script>
 
 </body>

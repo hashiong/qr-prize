@@ -2,29 +2,76 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>奖券扫码器</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont;
-      text-align: center;
-      background: #fff6f8;
+    * {
+      box-sizing: border-box;
     }
-    #reader { width: 300px; margin: 20px auto; }
-    #result {
-      font-size: 18px;
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC";
+      background: linear-gradient(180deg, #fff1f4, #ffffff);
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .scanner {
       background: #fff;
-      padding: 15px;
-      border-radius: 12px;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    #reader {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .result-card {
+      margin-top: 16px;
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 18px;
+      font-size: 18px;
+      line-height: 1.5;
+      box-shadow: 0 8px 20px rgba(255,120,150,.25);
       white-space: pre-line;
+      animation: pop .35s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #888;
     }
   </style>
 </head>
+
 <body>
 
-<h2>🎁 奖券扫码器</h2>
-<div id="reader"></div>
-<div id="result">请扫描奖券二维码</div>
+<h1>🎁 扫描你的奖券</h1>
+
+<div class="scanner">
+  <div id="reader"></div>
+</div>
+
+<div id="result" class="result-card">请扫描奖券二维码</div>
+<div class="hint">每张奖券都有自己的命运 ✨</div>
 
 <script>
 const prizes = {
@@ -32,7 +79,9 @@ const prizes = {
   "FIRST": "🥇 一等奖\n围巾兑换券",
   "SECOND": "🥈 二等奖\n一封生日的信",
   "THIRD": "🥉 三等奖\n若来「樱之梦旅」音乐盒",
-  "COMFORT": "💝 安慰奖\n一个吻 + 一个小袋子"
+  "COMFORT": Math.random() < 0.5
+    ? "💝 安慰奖\n💋 一个吻"
+    : "💝 安慰奖\n👜 一个小袋子"
 };
 
 function onScanSuccess(text) {

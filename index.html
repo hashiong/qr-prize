@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>奖券扫码器</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont;
+      text-align: center;
+      background: #fff6f8;
+    }
+    #reader { width: 300px; margin: 20px auto; }
+    #result {
+      font-size: 18px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🎁 奖券扫码器</h2>
+<div id="reader"></div>
+<div id="result">请扫描奖券二维码</div>
+
+<script>
+const prizes = {
+  "SPECIAL": "🎉 特等奖\n包包兑换券（仅限日本使用）\n最终解释权归雷宏恩同学所有",
+  "FIRST": "🥇 一等奖\n围巾兑换券",
+  "SECOND": "🥈 二等奖\n一封生日的信",
+  "THIRD": "🥉 三等奖\n若来「樱之梦旅」音乐盒",
+  "COMFORT": "💝 安慰奖\n一个吻 + 一个小袋子"
+};
+
+function onScanSuccess(text) {
+  document.getElementById("result").innerText =
+    prizes[text] || "❌ 无效奖券";
+}
+
+new Html5Qrcode("reader").start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  onScanSuccess
+);
+</script>
+
+</body>
+</html>

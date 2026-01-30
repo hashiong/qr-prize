@@ -115,7 +115,7 @@
 
 <body>
 
-<h1>🐷🌸</h1>
+<h1>🐷猪猪扫描仪🌸</h1>
 
 <div class="scanner">
   <div id="reader"></div>
@@ -148,7 +148,9 @@ function onScanSuccess(text) {
   if (locked) return;
   locked = true;
   
-  // Haptic feedback for mobile
+  // Hide the loading text when the prize pops up
+  loadingText.style.display = "none";
+  
   if (navigator.vibrate) navigator.vibrate(50);
 
   document.getElementById("modalText").innerText = prizes[text] || "❌ 无效奖券";
@@ -157,10 +159,12 @@ function onScanSuccess(text) {
 
 function closeModal() {
   document.getElementById("overlay").style.display = "none";
+  // Show the loading text again for the next scan
+  loadingText.style.display = "block";
   locked = false;
 }
 
-// Mobile-optimized initialization
+// Start scanning
 html5QrCode.start(
   { facingMode: "environment" },
   { 
@@ -168,11 +172,19 @@ html5QrCode.start(
     qrbox: { width: 250, height: 250 },
     aspectRatio: 1.0 
   },
-  onScanSuccess
+  (text) => {
+    onScanSuccess(text);
+  },
+  (errorMessage) => {
+    // Keep this empty so the loading text stays visible 
+    // and doesn't flicker while searching
+  }
 ).then(() => {
-    // Keep your original "Thinking" emoji/text or change to "Ready"
-    loadingText.innerHTML = "🐷 准备好啦！"; 
+    // IMPORTANT: Make the element visible once the camera starts
+    loadingText.style.display = "block"; 
+    loadingText.innerHTML = "🐷 思考中..."; 
 }).catch(err => {
+    loadingText.style.display = "block";
     loadingText.innerText = "❌ 请允许相机权限";
 });
 </script>

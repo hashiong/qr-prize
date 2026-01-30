@@ -7,19 +7,6 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
-    .emoji-title {
-  font-size: 36px;
-  margin-bottom: 12px;
-  animation: bounce 2.2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%   { transform: translateY(0) scale(1); }
-  40%  { transform: translateY(-6px) scale(1.05); }
-  60%  { transform: translateY(0) scale(0.98); }
-  100% { transform: translateY(0) scale(1); }
-}
-
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC";
@@ -29,8 +16,16 @@
     }
 
     h1 {
-      font-size: 22px;
+      font-size: 36px;
       margin-bottom: 12px;
+      animation: bounce 2.2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%   { transform: translateY(0) scale(1); }
+      40%  { transform: translateY(-6px) scale(1.05); }
+      60%  { transform: translateY(0) scale(0.98); }
+      100% { transform: translateY(0) scale(1); }
     }
 
     .scanner {
@@ -45,6 +40,21 @@
     #reader {
       border-radius: 16px;
       overflow: hidden;
+    }
+
+    /* Loading 动画 */
+    .loading {
+      margin-top: 12px;
+      font-size: 18px;
+      color: #ff7a9e;
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%   { transform: scale(1); opacity: 0.6; }
+      50%  { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.6; }
     }
 
     /* 遮罩 */
@@ -98,10 +108,11 @@
 
 <body>
 
-<h1>🐷扫描你的奖券🌸</h1>
+<h1>🐷🌸</h1>
 
 <div class="scanner">
   <div id="reader"></div>
+  <div id="loading" class="loading">🐷 思考中...</div>
 </div>
 
 <!-- 弹窗 -->
@@ -124,14 +135,14 @@ const prizes = {
 };
 
 let locked = false;
+const loading = document.getElementById("loading");
 
 function onScanSuccess(text) {
-  if (locked) return; // 防止重复触发
+  if (locked) return;
   locked = true;
-
+  loading.style.display = "none"; // 隐藏 loading
   document.getElementById("modalText").innerText =
     prizes[text] || "❌ 无效奖券";
-
   document.getElementById("overlay").style.display = "flex";
 }
 
@@ -143,7 +154,13 @@ function closeModal() {
 new Html5Qrcode("reader").start(
   { facingMode: "environment" },
   { fps: 10, qrbox: 250 },
-  onScanSuccess
+  (text) => {
+    loading.style.display = "none";
+    onScanSuccess(text);
+  },
+  (errorMessage) => {
+    loading.style.display = "block";
+  }
 );
 </script>
 
